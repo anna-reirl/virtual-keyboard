@@ -29,24 +29,56 @@ const processSpecial = (k) => { if (k.code === 'Space') keyInsert(' ');
       if (k.code === 'Backspace') keyDel(-1, 0); //удалить символ до курсора
       if (k.code === 'Delete') keyDel(0, 1); // удалить символ после курсора
     }
-    function init() {
-      for (let row of data) {
-        let rowDiv = createElem('div', 'row');
-        for (let key of row) {
-          let keyDiv = createElem('div', 'key'); setLang(keyDiv, key);
-          keyDiv.style.width = ((key.size) ? key.size * keyWidth : keyWidth) + 'px';
-          rowDiv.appendChild(keyDiv);
-          keyDiv.addEventListener('click', () => { if (!key.special) keyInsert(keyDiv.textContent[0].toLowerCase()); processSpecial(key); });
-          key['div'] = keyDiv;
-          keys.push(key);
-        }
-        keyboard.appendChild(rowDiv);
+function init() {
+  // получить данные из json
+  fetch(jsonUrl)
+  .then((response) => {
+    return response.json();
+  })
+  .then((data) => {
+    for (let row of data) {
+      // row - объект строки (ряда) клавиш
+      let rowDiv = createElem('div', 'row'); // создать div строки
+      for (let key of row) {
+        // key - объект клавиши
+        let keyDiv = createElem('div', 'key'); // создать div клавиши
+        setLang(keyDiv, key); 
+        keyDiv.style.width = ((key.size) ? key.size * keyWidth : keyWidth) + 'px';
+        rowDiv.appendChild(keyDiv);
+        // клик по клавише вставляет в textarea символ этой клавиши (если это не спецклавиша)
+        // спецклавиши обрабатываются функцией processSpecial
+        keyDiv.addEventListener('click', () => { if (!key.special) keyInsert(keyDiv.textContent[0].toLowerCase()); processSpecial(key); });
+        key['div'] = keyDiv; // запомнить div клавиши в новом поле div
+        keys.push(key); // занести все объекты клавиш в массив keys
       }
-      ta.addEventListener('keydown', (e) => { let key = keys.find((k) => k.code === e.code); if (!key) return; key.div.classList.add('pressed');
-        processSpecial(e); if (key.special) e.preventDefault();
-      });
-      ta.addEventListener('keyup', (e) => { let key = keys.find((k) => k.code === e.code); if (!key) return; key.div.classList.remove('pressed');
-        if (e.code === 'ShiftLeft' && e.altKey || e.code === 'AltLeft' && e.shiftKey) { mode = 1 - mode; keys.forEach(k => setLang(k.div, k)); }
-      });
+      keyboard.appendChild(rowDiv);
     }
+  
+    // обработка начала нажатия клавиш
+    ta.addEventListener('keydown', (e) => { 
+      // поискать, есть ли нажатая клавиша в начальных данных
+      let key = keys.find((k) => k.code === e.code); 
+      if (!key) return;
+      // подсветить клавишу
+      key.div.classList.add('pressed');
+      processSpecial(e); 
+      if (key.special) e.preventDefault();
+    });
+  
+    // обработка отпускания клавиш
+    ta.addEventListener('keyup', (e) => { 
+      // поискать, есть ли нажатая клавиша в начальных данных
+      let key = keys.find((k) => k.code === e.code); 
+      if (!key) return; 
+      // убрать подсветку
+      key.div.classList.remove('pressed');
+      // обработка Shift + Alt
+      if (e.code === 'ShiftLeft' && e.altKey || e.code === 'AltLeft' && e.shiftKey) { 
+        mode = 1 - mode; // сменить бит режима
+        keys.forEach(k => setLang(k.div, k)); // у всех клавиш сменить букву
+      }
+    })
+  });
+}
+
 init();
