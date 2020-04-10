@@ -1,6 +1,5 @@
 let mode = 0, keyWidth = 40, keys = [];
-let keyboard = document.getElementById('keyboard');
-let ta = document.getElementById('textarea');
+let jsonUrl = '/keys.json';
 // далее создаю элемент типа el с классом cl
 const createElem = (el, cl) => { 
   let elem = document.createElement(el);
