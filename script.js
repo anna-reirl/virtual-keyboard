@@ -1,33 +1,44 @@
-let mode = 0, keyWidth = 40, keys = [];
-let jsonUrl = '/keys.json';
-// далее создаю элемент типа el с классом cl
-const createElem = (el, cl) => { 
-  let elem = document.createElement(el);
-   elem.classList.add(cl); 
-   return elem; }
-// сменяю букву на клавише (div элементе), буква меняется по режиму mode ()
+
+// создать keyboard
+let keyboard = createElem('div', 'keyboard');
+document.body.appendChild(keyboard);
+
+// создать доп.текст
+let pLang = createElem('p', 'lang');
+pLang.textContent = 'Alt+Shift - переключить раскладку';
+document.body.appendChild(pLang);
+
+// установить букву на клавише (div элементе) с учетом режима mode (0 - англ, 1 - рус)
 const setLang = (div, key) => div.textContent = (key.values.length > 1) ? key.values[mode] : key.values[0];
-// вставить символ в textarea
-const keyInsert = (c) => { let s = ta.selectionStart; // позиция курсора
-  // досимвольная часть строки+ символ+послесимвольная часть
-   ta.value = ta.value.substring(0, s) + c + ta.value.substring(s, ta.value.length); 
-   ta.focus(); ta.setSelectionRange(s + 1, s + 1); //курсор на новое место
-  }
-  // удалить символ из textarea
+
+// вставить символ c в textarea
+const keyInsert = (c) => { 
+  let s = ta.selectionStart; // позиция курсора
+  // досимвольная часть строки + символ + послесимвольная часть
+  ta.value = ta.value.substring(0, s) + c + ta.value.substring(s, ta.value.length); 
+  ta.focus(); // фокус на textarea
+  ta.setSelectionRange(s + 1, s + 1); // курсор на новое место
+}
+
+// удалить символ из textarea
 const keyDel = (a, b) => { 
-  // а-сколько отступить перед символом
-  // b-сколько отступить после
-  let s = ta.selectionStart;
-   ta.value = ta.value.substring(0, s + a) + ta.value.substring(s + b, ta.value.length);
-    ta.focus(); ta.setSelectionRange(s + a, s + a); //курсор на новое место
-   }
-  //  обработка вариантов поля code объекта k
-const processSpecial = (k) => { if (k.code === 'Space') keyInsert(' '); 
-      if (k.code === 'Tab') keyInsert('\t');
-      if (k.code === 'Enter') keyInsert('\n'); 
-      if (k.code === 'Backspace') keyDel(-1, 0); //удалить символ до курсора
-      if (k.code === 'Delete') keyDel(0, 1); // удалить символ после курсора
-    }
+  // a - сколько отступить перед символом
+  // b - сколько отступить после
+  let s = ta.selectionStart; 
+  ta.value = ta.value.substring(0, s + a) + ta.value.substring(s + b, ta.value.length); 
+  ta.focus(); 
+  ta.setSelectionRange(s + a, s + a); // курсор на новое место
+}
+
+// обработка вариантов поля code объекта k
+const processSpecial = (k) => { 
+  if (k.code === 'Space') keyInsert(' '); 
+  if (k.code === 'Tab') keyInsert('\t'); 
+  if (k.code === 'Enter') keyInsert('\n'); 
+  if (k.code === 'Backspace') keyDel(-1, 0); // удалить символ до курсора
+  if (k.code === 'Delete') keyDel(0, 1); // удалить символ после курсора
+}
+
 function init() {
   // получить данные из json
   fetch(jsonUrl)
@@ -70,7 +81,7 @@ function init() {
       let key = keys.find((k) => k.code === e.code); 
       if (!key) return; 
       // убрать подсветку
-      key.div.classList.remove('pressed');
+      setTimeout(() => key.div.classList.remove('pressed'), 500);
       // обработка Shift + Alt
       if (e.code === 'ShiftLeft' && e.altKey || e.code === 'AltLeft' && e.shiftKey) { 
         mode = 1 - mode; // сменить бит режима
