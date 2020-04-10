@@ -1,3 +1,18 @@
+let mode = 0, keyWidth = 40, keys = [];
+let jsonUrl = '/keys.json';
+
+// создать элемент типа el c классом cl
+const createElem = (el, cl) => { 
+  let elem = document.createElement(el); 
+  elem.classList.add(cl); 
+  return elem; 
+}
+
+// создать textarea
+let textWrapper = createElem('div', 'text-wrapper');
+let ta = createElem('textarea', 'textarea');
+textWrapper.appendChild(ta);
+document.body.appendChild(textWrapper);
 
 // создать keyboard
 let keyboard = createElem('div', 'keyboard');
@@ -7,6 +22,7 @@ document.body.appendChild(keyboard);
 let pLang = createElem('p', 'lang');
 pLang.textContent = 'Alt+Shift - переключить раскладку';
 document.body.appendChild(pLang);
+
 
 // установить букву на клавише (div элементе) с учетом режима mode (0 - англ, 1 - рус)
 const setLang = (div, key) => div.textContent = (key.values.length > 1) ? key.values[mode] : key.values[0];
@@ -92,3 +108,4 @@ function init() {
 }
 
 init();
+
